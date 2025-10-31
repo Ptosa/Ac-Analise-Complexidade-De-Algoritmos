@@ -7,8 +7,9 @@ let animationTimeouts = []; // Para controlar animações
 function initSVG() {
   const container = document.getElementById("graphVisualization");
   container.innerHTML = ""; // Limpar conteúdo anterior
-  
-  svg = d3.select("#graphVisualization")
+
+  svg = d3
+    .select("#graphVisualization")
     .append("svg")
     .attr("width", "100%")
     .attr("height", "100%");
@@ -45,7 +46,8 @@ function updateGraphDisplay() {
 function clearGraph() {
   graph = {};
   document.getElementById("adjListDisplay").textContent = "[Vazio]";
-  document.getElementById("resultDisplay").textContent = "Resultado aparecerá aqui...";
+  document.getElementById("resultDisplay").textContent =
+    "Resultado aparecerá aqui...";
   stopAnimation();
   if (svg) {
     svg.selectAll("*").remove();
@@ -55,7 +57,7 @@ function clearGraph() {
 // ====== Visualização D3.js ======
 function visualizeGraph() {
   if (!svg) initSVG();
-  
+
   stopAnimation();
   svg.selectAll("*").remove();
 
@@ -66,12 +68,12 @@ function visualizeGraph() {
   const height = container.clientHeight;
 
   // Preparar dados para D3
-  const nodes = Object.keys(graph).map(id => ({ id }));
+  const nodes = Object.keys(graph).map((id) => ({ id }));
   const links = [];
   const addedLinks = new Set();
 
   Object.entries(graph).forEach(([source, targets]) => {
-    targets.forEach(target => {
+    targets.forEach((target) => {
       const linkId = [source, target].sort().join("-");
       if (!addedLinks.has(linkId)) {
         links.push({ source, target });
@@ -81,14 +83,22 @@ function visualizeGraph() {
   });
 
   // Force simulation
-  simulation = d3.forceSimulation(nodes)
-    .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+  simulation = d3
+    .forceSimulation(nodes)
+    .force(
+      "link",
+      d3
+        .forceLink(links)
+        .id((d) => d.id)
+        .distance(100)
+    )
     .force("charge", d3.forceManyBody().strength(-300))
     .force("center", d3.forceCenter(width / 2, height / 2))
     .force("collision", d3.forceCollide().radius(40));
 
   // Desenhar arestas
-  const link = svg.append("g")
+  const link = svg
+    .append("g")
     .selectAll("line")
     .data(links)
     .enter()
@@ -96,33 +106,37 @@ function visualizeGraph() {
     .attr("class", "link");
 
   // Desenhar nós
-  const node = svg.append("g")
+  const node = svg
+    .append("g")
     .selectAll("g")
     .data(nodes)
     .enter()
     .append("g")
     .attr("class", "node node-default")
-    .call(d3.drag()
-      .on("start", dragStarted)
-      .on("drag", dragged)
-      .on("end", dragEnded));
+    .call(
+      d3
+        .drag()
+        .on("start", dragStarted)
+        .on("drag", dragged)
+        .on("end", dragEnded)
+    );
 
-  node.append("circle")
-    .attr("r", 25);
+  node.append("circle").attr("r", 25);
 
-  node.append("text")
-    .text(d => d.id)
+  node
+    .append("text")
+    .text((d) => d.id)
     .attr("fill", "white");
 
   // Atualizar posições
   simulation.on("tick", () => {
     link
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
+      .attr("x1", (d) => d.source.x)
+      .attr("y1", (d) => d.source.y)
+      .attr("x2", (d) => d.target.x)
+      .attr("y2", (d) => d.target.y);
 
-    node.attr("transform", d => `translate(${d.x},${d.y})`);
+    node.attr("transform", (d) => `translate(${d.x},${d.y})`);
   });
 
   // Funções de drag
@@ -147,8 +161,7 @@ function visualizeGraph() {
 // Resetar cores dos nós
 function resetNodeColors() {
   if (svg) {
-    svg.selectAll(".node")
-      .attr("class", "node node-default");
+    svg.selectAll(".node").attr("class", "node node-default");
   }
 }
 
@@ -159,7 +172,7 @@ document.getElementById("speedControl").addEventListener("input", (e) => {
 
 // Parar animação
 function stopAnimation() {
-  animationTimeouts.forEach(timeout => clearTimeout(timeout));
+  animationTimeouts.forEach((timeout) => clearTimeout(timeout));
   animationTimeouts = [];
   resetNodeColors();
 }
@@ -186,8 +199,9 @@ function runDFS() {
 
     // Animar nó atual
     const timeout1 = setTimeout(() => {
-      svg.selectAll(".node")
-        .filter(d => d.id === v)
+      svg
+        .selectAll(".node")
+        .filter((d) => d.id === v)
         .attr("class", "node node-current");
     }, step * speed);
     animationTimeouts.push(timeout1);
@@ -195,8 +209,9 @@ function runDFS() {
 
     // Marcar como visitado após um delay
     const timeout2 = setTimeout(() => {
-      svg.selectAll(".node")
-        .filter(d => d.id === v)
+      svg
+        .selectAll(".node")
+        .filter((d) => d.id === v)
         .attr("class", "node node-visited");
     }, step * speed);
     animationTimeouts.push(timeout2);
@@ -212,7 +227,9 @@ function runDFS() {
 
   // Mostrar resultado final
   const finalTimeout = setTimeout(() => {
-    document.getElementById("resultDisplay").textContent = `DFS: ${result.join(" → ")}`;
+    document.getElementById("resultDisplay").textContent = `DFS: ${result.join(
+      " → "
+    )}`;
   }, (step + 1) * speed);
   animationTimeouts.push(finalTimeout);
 }
@@ -236,8 +253,9 @@ function runBFS() {
 
   // Marcar nó inicial como visitando
   const timeout0 = setTimeout(() => {
-    svg.selectAll(".node")
-      .filter(d => d.id === start)
+    svg
+      .selectAll(".node")
+      .filter((d) => d.id === start)
       .attr("class", "node node-visiting");
   }, step * speed);
   animationTimeouts.push(timeout0);
@@ -250,8 +268,9 @@ function runBFS() {
     // Marcar nó atual como corrente
     const currentVertex = vertex;
     const timeout1 = setTimeout(() => {
-      svg.selectAll(".node")
-        .filter(d => d.id === currentVertex)
+      svg
+        .selectAll(".node")
+        .filter((d) => d.id === currentVertex)
         .attr("class", "node node-current");
     }, step * speed);
     animationTimeouts.push(timeout1);
@@ -259,8 +278,9 @@ function runBFS() {
 
     // Marcar como visitado
     const timeout2 = setTimeout(() => {
-      svg.selectAll(".node")
-        .filter(d => d.id === currentVertex)
+      svg
+        .selectAll(".node")
+        .filter((d) => d.id === currentVertex)
         .attr("class", "node node-visited");
     }, step * speed);
     animationTimeouts.push(timeout2);
@@ -273,8 +293,9 @@ function runBFS() {
         // Marcar vizinho como visitando (na fila)
         const neighborNode = neighbor;
         const timeout3 = setTimeout(() => {
-          svg.selectAll(".node")
-            .filter(d => d.id === neighborNode)
+          svg
+            .selectAll(".node")
+            .filter((d) => d.id === neighborNode)
             .attr("class", "node node-visiting");
         }, step * speed);
         animationTimeouts.push(timeout3);
@@ -285,7 +306,9 @@ function runBFS() {
 
   // Mostrar resultado final
   const finalTimeout = setTimeout(() => {
-    document.getElementById("resultDisplay").textContent = `BFS: ${result.join(" → ")}`;
+    document.getElementById("resultDisplay").textContent = `BFS: ${result.join(
+      " → "
+    )}`;
   }, (step + 1) * speed);
   animationTimeouts.push(finalTimeout);
 }
