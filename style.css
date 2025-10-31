@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-  max-width: 700px;
+  max-width: 1200px;
   margin: 40px auto;
   background: white;
   padding: 25px;
@@ -63,4 +63,126 @@ pre {
 
 .exit-button:hover {
   background-color: #c0392b;
+}
+
+/* Visualização do Grafo */
+.visualization-section {
+  margin-bottom: 25px;
+}
+
+#graphVisualization {
+  width: 100%;
+  height: 500px;
+  border: 2px solid #bdc3c7;
+  border-radius: 8px;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+#graphVisualization svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Estilos dos nós e arestas */
+.node {
+  cursor: pointer;
+}
+
+.node circle {
+  stroke: #2c3e50;
+  stroke-width: 2px;
+  transition: all 0.3s ease;
+}
+
+.node text {
+  font-size: 14px;
+  font-weight: bold;
+  pointer-events: none;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.link {
+  stroke: #95a5a6;
+  stroke-width: 2px;
+  fill: none;
+}
+
+/* Estados dos nós durante animação */
+.node-default circle {
+  fill: #3498db;
+}
+
+.node-visiting circle {
+  fill: #f39c12;
+  stroke-width: 4px;
+}
+
+.node-visited circle {
+  fill: #27ae60;
+}
+
+.node-current circle {
+  fill: #e74c3c;
+  stroke-width: 4px;
+}
+
+/* Controles de animação */
+.animation-controls {
+  margin: 15px 0;
+  padding: 15px;
+  background: #ecf0f1;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.animation-controls label {
+  font-weight: bold;
+}
+
+#speedControl {
+  flex: 1;
+  min-width: 150px;
+}
+
+#speedValue {
+  min-width: 60px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.stop-btn {
+  background-color: #e67e22;
+}
+
+.stop-btn:hover {
+  background-color: #d35400;
+}
+
+/* Legenda */
+.legend {
+  margin-top: 10px;
+  padding: 10px;
+  background: #ecf0f1;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.legend-item {
+  display: inline-block;
+  margin-right: 15px;
+}
+
+.legend-item span {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
 }

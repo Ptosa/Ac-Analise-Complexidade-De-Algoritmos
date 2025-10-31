@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Grafo - DFS e BFS</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -23,6 +24,18 @@
       <pre id="adjListDisplay">[Vazio]</pre>
     </div>
 
+    <div class="visualization-section">
+      <h2>Visualização do Grafo</h2>
+      <div id="graphVisualization"></div>
+      <div class="legend">
+        <strong>Legenda:</strong>
+        <span class="legend-item"><span style="background: #3498db;"></span>Não visitado</span>
+        <span class="legend-item"><span style="background: #f39c12;"></span>Na fila (BFS)</span>
+        <span class="legend-item"><span style="background: #e74c3c;"></span>Visitando agora</span>
+        <span class="legend-item"><span style="background: #27ae60;"></span>Visitado</span>
+      </div>
+    </div>
+
     <div class="algorithm-section">
       <h2>Executar Algoritmo</h2>
       <input type="text" id="startNode" placeholder="Vértice inicial (ex: A)" />
@@ -30,6 +43,14 @@
         <button onclick="runDFS()">Executar DFS</button>
         <button onclick="runBFS()">Executar BFS</button>
       </div>
+      
+      <div class="animation-controls">
+        <label for="speedControl">Velocidade da Animação:</label>
+        <input type="range" id="speedControl" min="100" max="2000" value="800" step="100" />
+        <span id="speedValue">800ms</span>
+        <button onclick="stopAnimation()" class="stop-btn">Parar Animação</button>
+      </div>
+      
       <pre id="resultDisplay">Resultado aparecerá aqui...</pre>
     </div>
 
