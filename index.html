@@ -1,41 +1,41 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Grafo - DFS e BFS</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Visualizador de Grafos</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    textarea, input { width: 100%; margin-top: 10px; }
+    button { margin-top: 10px; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Visualizador de Grafos - DFS e BFS</h1>
+  <h1>Algoritmos de Grafos: BFS e DFS</h1>
 
-    <div class="input-section">
-      <h2>Inserir Arestas</h2>
-      <p>Adicione as arestas no formato: <strong>Origem Destino</strong></p>
-      <input type="text" id="edgeInput" placeholder="Ex: A B" />
-      <button onclick="addEdge()">Adicionar Aresta</button>
-      <button onclick="clearGraph()">Limpar Grafo</button>
-    </div>
+  <label for="edgeInput">Adicionar Aresta (formato: A B)</label>
+  <input type="text" id="edgeInput" placeholder="Ex: A B">
 
-    <div class="graph-display">
-      <h2>Lista de Adjacência</h2>
-      <pre id="adjListDisplay">[Vazio]</pre>
-    </div>
+  <label>
+    <input type="checkbox" id="directedCheckbox">
+    Grafo direcionado
+  </label>
 
-    <div class="algorithm-section">
-      <h2>Executar Algoritmo</h2>
-      <input type="text" id="startNode" placeholder="Vértice inicial (ex: A)" />
-      <div class="buttons">
-        <button onclick="runDFS()">Executar DFS</button>
-        <button onclick="runBFS()">Executar BFS</button>
-      </div>
-      <pre id="resultDisplay">Resultado aparecerá aqui...</pre>
-    </div>
+  <button onclick="addEdge()">Adicionar Aresta</button>
+  <button onclick="clearGraph()">Limpar Grafo</button>
 
-    <button class="exit-button" onclick="exitApp()">Finalizar Aplicação</button>
-  </div>
+  <h2>Lista de Adjacência</h2>
+  <pre id="adjListDisplay">[Vazio]</pre>
 
-  <script src="script.js"></script>
+  <label for="startNode">Vértice Inicial</label>
+  <input type="text" id="startNode" placeholder="Ex: A">
+
+  <button onclick="runDFS()">Executar DFS</button>
+  <button onclick="runBFS()">Executar BFS</button>
+  <button onclick="exitApp()">Finalizar</button>
+
+  <h2>Resultado</h2>
+  <p id="resultDisplay">Resultado aparecerá aqui...</p>
+
+  script.js</script>
 </body>
 </html>
