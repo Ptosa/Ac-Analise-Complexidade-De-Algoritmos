@@ -2,6 +2,8 @@ let graph = {}; // Lista de adjacência
 
 function addEdge() {
   const input = document.getElementById("edgeInput").value.trim();
+  const isDirected = document.getElementById("directedCheckbox").checked;
+
   if (!input) return;
 
   const [from, to] = input.split(" ");
@@ -14,7 +16,9 @@ function addEdge() {
   if (!graph[to]) graph[to] = [];
 
   graph[from].push(to);
-  graph[to].push(from); // Grafo não direcionado
+  if (!isDirected) {
+    graph[to].push(from); // Só adiciona a volta se for não-direcionado
+  }
 
   document.getElementById("edgeInput").value = "";
   updateGraphDisplay();
@@ -82,6 +86,8 @@ function runBFS() {
 
   document.getElementById("resultDisplay").textContent = `BFS: ${result.join(" → ")}`;
 }
+
+
 
 // ====== Finalizar ======
 function exitApp() {
