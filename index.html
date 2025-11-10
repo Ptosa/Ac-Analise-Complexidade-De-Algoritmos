@@ -1,41 +1,75 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Visualizador de Grafos</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    textarea, input { width: 100%; margin-top: 10px; }
-    button { margin-top: 10px; }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grafo - DFS e BFS</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
+
 <body>
-  <h1>Algoritmos de Grafos: BFS e DFS</h1>
+    <div class="container">
+        <h1>Visualizador de Grafos - DFS e BFS</h1>
 
-  <label for="edgeInput">Adicionar Aresta (formato: A B)</label>
-  <input type="text" id="edgeInput" placeholder="Ex: A B">
+        <div class="input-section">
+            <h2>Inserir Arestas</h2>
+            <div class="instructions">
+                <p><strong>📝 Como adicionar arestas:</strong></p>
+                <ol>
+                    <li>Digite dois vértices separados por <strong>espaço</strong> (ex: A B)</li>
+                    <li>Clique em "Adicionar Aresta" para criar a conexão</li>
+                    <li>Repita para adicionar mais conexões ao grafo</li>
+                </ol>
+                <p class="tip">💡 <strong>Dica:</strong> Os vértices podem ser letras (A, B, C) ou números (1, 2, 3)</p>
+            </div>
+            <div class="input-group">
+                <input type="text" id="edgeInput" placeholder="Ex: A B" />
+                <button onclick="addEdge()">Adicionar Aresta</button>
+                <button onclick="clearGraph()">Limpar Grafo</button>
+            </div>
+        </div>
 
-  <label>
-    <input type="checkbox" id="directedCheckbox">
-    Grafo direcionado
-  </label>
+        <div class="graph-display">
+            <h2>Lista de Adjacência</h2>
+            <pre id="adjListDisplay">[Vazio]</pre>
+        </div>
 
-  <button onclick="addEdge()">Adicionar Aresta</button>
-  <button onclick="clearGraph()">Limpar Grafo</button>
+        <div class="visualization-section">
+            <h2>Visualização do Grafo</h2>
+            <div id="graphVisualization"></div>
+            <div class="legend">
+                <strong>Legenda:</strong>
+                <span class="legend-item"><span style="background: #3498db;"></span>Não visitado</span>
+                <span class="legend-item"><span style="background: #f39c12;"></span>Na fila (BFS)</span>
+                <span class="legend-item"><span style="background: #e74c3c;"></span>Visitando agora</span>
+                <span class="legend-item"><span style="background: #27ae60;"></span>Visitado</span>
+            </div>
+        </div>
 
-  <h2>Lista de Adjacência</h2>
-  <pre id="adjListDisplay">[Vazio]</pre>
+        <div class="algorithm-section">
+            <h2>Executar Algoritmo</h2>
+            <div class="algorithm-input-group">
+                <input type="text" id="startNode" placeholder="Vértice inicial (ex: A)" />
+                <button onclick="runDFS()">Executar DFS</button>
+                <button onclick="runBFS()">Executar BFS</button>
+            </div>
 
-  <label for="startNode">Vértice Inicial</label>
-  <input type="text" id="startNode" placeholder="Ex: A">
+            <div class="animation-controls">
+                <label for="speedControl">Velocidade da Animação:</label>
+                <input type="range" id="speedControl" min="100" max="2000" value="800" step="100" />
+                <span id="speedValue">800ms</span>
+                <button onclick="stopAnimation()" class="stop-btn">Parar Animação</button>
+            </div>
 
-  <button onclick="runDFS()">Executar DFS</button>
-  <button onclick="runBFS()">Executar BFS</button>
-  <button onclick="exitApp()">Finalizar</button>
+            <pre id="resultDisplay">Resultado aparecerá aqui...</pre>
+        </div>
 
-  <h2>Resultado</h2>
-  <p id="resultDisplay">Resultado aparecerá aqui...</p>
+        <button class="exit-button" onclick="exitApp()">Finalizar Aplicação</button>
+    </div>
 
-  script.js</script>
+    <script src="script.js"></script>
 </body>
+
 </html>
