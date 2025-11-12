@@ -242,3 +242,24 @@ pre {
     margin-right: 5px;
     vertical-align: middle;
 }
+#dfsTreeContainer svg {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.link {
+  stroke: #bbb;
+  stroke-width: 2px;
+}
+
+.node circle {
+  transition: fill 0.3s;
+}
+
+.node:hover circle {
+  fill: #f39c12;
+}
+.node text {
+  font-size: 12px;
+  pointer-events: none;
+}

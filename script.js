@@ -182,7 +182,12 @@ function stopAnimation() {
 }
 
 // ====== DFS ======
-function runDFS() {
+// Função para "pausar" entre etapas
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function runDFS() {
   const start = document.getElementById("startNode").value.trim();
   if (!graph[start]) {
     alert("Vértice inicial inválido!");
@@ -192,51 +197,158 @@ function runDFS() {
   stopAnimation();
   resetNodeColors();
 
-  let visited = new Set();
-  let result = [];
-  let step = 0;
   const speed = parseInt(document.getElementById("speedControl").value);
+  const visited = new Set();
+  const firstVisit = {};
+  const lastVisit = {};
+  let time = 0;
+  let result = [];
 
-  function dfs(v) {
-    visited.add(v);
-    result.push(v);
+  // 🔹 Função recursiva assíncrona
+  async function dfs(node) {
+    visited.add(node);
+    firstVisit[node] = ++time;
+    result.push(node);
 
-    // Animar nó atual
-    const timeout1 = setTimeout(() => {
-      svg
-        .selectAll(".node")
-        .filter((d) => d.id === v)
-        .attr("class", "node node-current");
-    }, step * speed);
-    animationTimeouts.push(timeout1);
-    step++;
+    // Marcar como "visitando"
+    svg.selectAll(".node")
+      .filter(d => d.id === node)
+      .attr("class", "node node-current");
 
-    // Marcar como visitado após um delay
-    const timeout2 = setTimeout(() => {
-      svg
-        .selectAll(".node")
-        .filter((d) => d.id === v)
-        .attr("class", "node node-visited");
-    }, step * speed);
-    animationTimeouts.push(timeout2);
+    await sleep(speed);
 
-    for (let neighbor of graph[v]) {
+    for (let neighbor of graph[node]) {
       if (!visited.has(neighbor)) {
-        dfs(neighbor);
+        await dfs(neighbor);
       }
+    }
+
+    lastVisit[node] = ++time;
+    svg.selectAll(".node")
+      .filter(d => d.id === node)
+      .attr("class", "node node-visited");
+
+    await sleep(speed);
+  }
+
+  // 🔹 Executar DFS e mostrar resultado
+  await dfs(start);
+
+  // Mostrar resultado textual
+  let resultText = "DFS: " + result.join(" → ") + "\n\n";
+  resultText += "Tempos de visita:\n";
+  Object.keys(firstVisit).forEach(v => {
+    resultText += `${v}: first=${firstVisit[v]}, last=${lastVisit[v]}\n`;
+  });
+
+  document.getElementById("resultDisplay").textContent = resultText;
+}
+// Visualizar árvore DFS em SVG separado
+function gerarArvoreDFS(start, parent, first, last) {
+  // Montar estrutura pai → filhos
+  let children = {};
+  for (let [node, p] of Object.entries(parent)) {
+    if (p !== null) {
+      if (!children[p]) children[p] = [];
+      children[p].push(node);
     }
   }
 
-  dfs(start);
+  // Função recursiva para imprimir a árvore
+  function printSubtree(node, prefix = "") {
+    let text = `${prefix}${node} (first=${first[node]}, last=${last[node]})\n`;
+    const subs = children[node] || [];
+    for (let i = 0; i < subs.length; i++) {
+      const isLast = i === subs.length - 1;
+      const newPrefix = prefix + (isLast ? "    " : "│   ");
+      text += prefix + (isLast ? "└── " : "├── ") + printSubtree(subs[i], newPrefix);
+    }
+    return text;
+  }
 
-  // Mostrar resultado final
-  const finalTimeout = setTimeout(() => {
-    document.getElementById("resultDisplay").textContent = `DFS: ${result.join(
-      " → "
-    )}`;
-  }, (step + 1) * speed);
-  animationTimeouts.push(finalTimeout);
+  return printSubtree(start);
 }
+function visualizarArvoreDFS(start, parent, first, last) {
+  const container = d3.select("#dfsTreeContainer");
+  container.selectAll("*").remove();
+
+  // Montar estrutura pai → filhos
+  let children = {};
+  for (let [node, p] of Object.entries(parent)) {
+    if (p !== null) {
+      if (!children[p]) children[p] = [];
+      children[p].push(node);
+    }
+  }
+
+  // Converter em estrutura hierárquica para D3
+  function buildTree(node) {
+    return {
+      name: node,
+      first: first[node],
+      last: last[node],
+      children: (children[node] || []).map(buildTree)
+    };
+  }
+
+  const treeData = buildTree(start);
+
+  // Dimensões do SVG
+  const width = container.node().clientWidth;
+  const height = container.node().clientHeight;
+
+  const svgTree = container.append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("g")
+    .attr("transform", "translate(50,50)");
+
+  const root = d3.hierarchy(treeData);
+  const treeLayout = d3.tree().size([height - 100, width - 200]);
+  treeLayout(root);
+
+  // Links (conexões)
+  svgTree.selectAll(".link")
+    .data(root.links())
+    .enter()
+    .append("path")
+    .attr("class", "link")
+    .attr("d", d3.linkVertical()
+      .x(d => d.x)
+      .y(d => d.y))
+    .attr("fill", "none")
+    .attr("stroke", "#999")
+    .attr("stroke-width", 2);
+
+  // Nós
+  const node = svgTree.selectAll(".node")
+    .data(root.descendants())
+    .enter()
+    .append("g")
+    .attr("class", "node")
+    .attr("transform", d => `translate(${d.x},${d.y})`);
+
+  node.append("circle")
+    .attr("r", 25)
+    .attr("fill", "#3498db")
+    .attr("stroke", "#fff")
+    .attr("stroke-width", 2);
+
+  node.append("text")
+    .attr("dy", 5)
+    .attr("text-anchor", "middle")
+    .attr("fill", "white")
+    .style("font-weight", "bold")
+    .text(d => d.data.name);
+
+  node.append("text")
+    .attr("dy", 35)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#333")
+    .style("font-size", "12px")
+    .text(d => `(${d.data.first}, ${d.data.last})`);
+}
+
 
 // ====== BFS ======
 function runBFS() {
