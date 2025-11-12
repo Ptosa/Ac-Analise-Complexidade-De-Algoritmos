@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Grafo - DFS e BFS</title>
     <link rel="stylesheet" href="style.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="script.js"></script>
 </head>
 
 <body>
@@ -16,16 +16,16 @@
         <div class="input-section">
             <h2>Inserir Arestas</h2>
             <div class="instructions">
-                <p><strong>📝 Como adicionar arestas:</strong></p>
-                <ol>
+                <ul>
                     <li>Digite dois vértices separados por <strong>espaço</strong> (ex: A B)</li>
                     <li>Clique em "Adicionar Aresta" para criar a conexão</li>
                     <li>Repita para adicionar mais conexões ao grafo</li>
-                </ol>
+                </ul>
                 <p class="tip">💡 <strong>Dica:</strong> Os vértices podem ser letras (A, B, C) ou números (1, 2, 3)</p>
             </div>
             <div class="input-group">
                 <input type="text" id="edgeInput" placeholder="Ex: A B" />
+                <label><input type="checkbox" id="directedCheckbox"> Grafo direcionado</label>
                 <button onclick="addEdge()">Adicionar Aresta</button>
                 <button onclick="clearGraph()">Limpar Grafo</button>
             </div>
@@ -38,7 +38,7 @@
 
         <div class="visualization-section">
             <h2>Visualização do Grafo</h2>
-            <div id="graphVisualization"></div>
+            <div id="graphVisualization" style="height: 400px; border: 1px solid #ccc;"></div>
             <div class="legend">
                 <strong>Legenda:</strong>
                 <span class="legend-item"><span style="background: #3498db;"></span>Não visitado</span>
@@ -71,5 +71,4 @@
 
     <script src="script.js"></script>
 </body>
-
 </html>
