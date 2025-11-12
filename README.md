@@ -268,6 +268,223 @@ function bfs(start) {
 
 ---
 
+## 🎨 Como Funciona o D3.js no Projeto
+
+### 📊 **O que é D3.js?**
+
+**D3.js** (Data-Driven Documents) é uma biblioteca JavaScript que manipula documentos baseados em dados. Ela permite criar visualizações interativas usando **SVG**, **HTML** e **CSS**.
+
+**Por que usar?** Transforma dados abstratos em representações visuais compreensíveis.
+
+---
+
+### 🔧 **Implementação Passo a Passo**
+
+#### **1. Estrutura de Dados do Grafo**
+
+```javascript
+let graph = {
+    A: ['B', 'D'],
+    B: ['A', 'C', 'E'],
+    C: ['B'],
+    // ... Lista de adjacência
+};
+```
+
+#### **2. Criação do SVG**
+
+```javascript
+svg = d3.select("#graphVisualization")
+    .append("svg")
+    .attr("width", "100%")
+    .attr("height", "100%");
+```
+
+**O que faz:** Seleciona o container e adiciona um elemento SVG onde o grafo será desenhado.
+
+---
+
+#### **3. Preparação dos Dados**
+
+```javascript
+// Nós: cada vértice vira um objeto
+const nodes = Object.keys(graph).map(id => ({ id }));
+// Resultado: [{id: 'A'}, {id: 'B'}, ...]
+
+// Arestas: conexões entre nós
+const links = [];
+Object.entries(graph).forEach(([source, targets]) => {
+    targets.forEach(target => {
+        links.push({ source, target });
+    });
+});
+// Resultado: [{source: 'A', target: 'B'}, ...]
+```
+
+---
+
+#### **4. Force Simulation (O "Cérebro" do Layout)**
+
+```javascript
+simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(links).distance(100))    // Distância entre nós conectados
+    .force("charge", d3.forceManyBody().strength(-300))   // Repulsão entre todos os nós
+    .force("center", d3.forceCenter(width/2, height/2))   // Centraliza o grafo
+    .force("collision", d3.forceCollide().radius(40));    // Evita sobreposição
+```
+
+**O que faz:** 
+- Calcula posições automaticamente usando física
+- Nós se repelem (como ímãs)
+- Arestas puxam nós conectados
+- Resultado: layout orgânico e equilibrado
+
+---
+
+#### **5. Desenhar as Arestas (Linhas)**
+
+```javascript
+const link = svg.append("g")
+    .selectAll("line")
+    .data(links)              // Vincula dados das arestas
+    .enter()
+    .append("line")           // Cria uma linha para cada aresta
+    .attr("class", "link");   // Aplica estilo CSS
+```
+
+**Resultado:** Linhas conectando os nós.
+
+---
+
+#### **6. Desenhar os Nós (Círculos + Texto)**
+
+```javascript
+const node = svg.append("g")
+    .selectAll("g")
+    .data(nodes)              // Vincula dados dos nós
+    .enter()
+    .append("g")              // Grupo para cada nó
+    .attr("class", "node node-default");
+
+// Círculo
+node.append("circle").attr("r", 25);
+
+// Texto (letra do vértice)
+node.append("text")
+    .text(d => d.id)          // d.id = 'A', 'B', etc.
+    .attr("fill", "white");
+```
+
+**Resultado:** Círculos azuis com letras brancas.
+
+---
+
+#### **7. Atualização Contínua (Tick)**
+
+```javascript
+simulation.on("tick", () => {
+    // Atualiza posição das linhas
+    link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+    // Atualiza posição dos nós
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+```
+
+**O que faz:** 
+- A simulação calcula novas posições várias vezes por segundo
+- Cada "tick" atualiza as coordenadas x, y dos elementos
+- Resultado: animação suave até estabilizar
+
+---
+
+#### **8. Drag & Drop (Arrastar Nós)**
+
+```javascript
+.call(d3.drag()
+    .on("start", dragStarted)   // Congela o nó
+    .on("drag", dragged)        // Move para nova posição
+    .on("end", dragEnded)       // Libera o nó
+);
+
+function dragged(event, d) {
+    d.fx = event.x;  // Força posição x
+    d.fy = event.y;  // Força posição y
+}
+```
+
+**O que faz:** Permite clicar e arrastar nós para reorganizar o grafo.
+
+---
+
+#### **9. Animação dos Algoritmos**
+
+```javascript
+// Mudar cor do nó durante DFS/BFS
+svg.selectAll(".node")
+    .filter(d => d.id === vertice)
+    .attr("class", "node node-current");  // Vermelho
+```
+
+**Classes CSS:**
+- `node-default` → Azul (não visitado)
+- `node-visiting` → Laranja (na fila)
+- `node-current` → Vermelho (visitando)
+- `node-visited` → Verde (visitado)
+
+---
+
+### 🎨 **Fluxo Completo**
+
+```
+1. Usuário adiciona aresta (A B)
+   ↓
+2. graph = {A: ['B'], B: ['A']}
+   ↓
+3. visualizeGraph() chamada
+   ↓
+4. Converter para nodes/links
+   ↓
+5. Force simulation calcula posições
+   ↓
+6. Desenhar linhas e círculos no SVG
+   ↓
+7. Tick atualiza posições 60x/seg
+   ↓
+8. Usuário executa DFS/BFS
+   ↓
+9. setTimeout muda cores dos nós
+   ↓
+10. Animação visual passo a passo
+```
+
+---
+
+### 💡 **Por que D3.js é Perfeito para Grafos?**
+
+✅ **Force Simulation** - Layout automático inteligente  
+✅ **Data Binding** - Liga dados JavaScript a elementos SVG  
+✅ **Transições** - Animações suaves  
+✅ **Interatividade** - Drag, zoom, hover nativo  
+✅ **Performance** - Otimizado para milhares de elementos  
+
+---
+
+### 🔑 **Conceitos-Chave D3.js**
+
+1. **`.select()` / `.selectAll()`** - Seleciona elementos DOM/SVG
+2. **`.data()`** - Vincula array de dados aos elementos
+3. **`.enter()`** - Cria novos elementos para dados sem elemento
+4. **`.attr()`** - Define atributos (x, y, r, class, etc.)
+5. **`.on()`** - Adiciona event listeners
+6. **`forceSimulation()`** - Motor de física para layout
+
+---
+
 ## 📁 Estrutura do Projeto
 
 ```
