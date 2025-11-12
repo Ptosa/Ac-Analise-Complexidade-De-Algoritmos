@@ -1,3 +1,10 @@
+# Alunos
+Igor Mariano Lopes Rodrigues - 202407095992 - Engenharia de Software
+Pedro Lustosa - 20220798936 - Ciência de Dados e Inteligêncial Artifical
+
+# Professor 
+Cassius Figueiredo - Análise e Complexidade de Algoritmos
+
 # 📊 Visualizador de Grafos - DFS e BFS
 
 <div align="center">
