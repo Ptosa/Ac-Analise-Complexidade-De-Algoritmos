@@ -160,6 +160,13 @@ pre {
     dominant-baseline: middle;
 }
 
+.level-label {
+    font-size: 11px !important;
+    font-weight: bold !important;
+    fill: #2c3e50 !important;
+    text-anchor: middle !important;
+}
+
 .link {
     stroke: #95a5a6;
     stroke-width: 2px;

@@ -162,6 +162,7 @@ function visualizeGraph() {
 function resetNodeColors() {
   if (svg) {
     svg.selectAll(".node").attr("class", "node node-default");
+    svg.selectAll(".level-label").remove(); // Remover labels de nível
   }
 }
 
@@ -246,10 +247,13 @@ function runBFS() {
   resetNodeColors();
 
   let visited = new Set([start]);
-  let queue = [start];
+  let queue = [[start, 0]]; // [vértice, nível]
   let result = [];
+  let levels = {}; // Armazena o nível de cada vértice
   let step = 0;
   const speed = parseInt(document.getElementById("speedControl").value);
+
+  levels[start] = 0;
 
   // Marcar nó inicial como visitando
   const timeout0 = setTimeout(() => {
@@ -262,16 +266,29 @@ function runBFS() {
   step++;
 
   while (queue.length > 0) {
-    let vertex = queue.shift();
-    result.push(vertex);
+    let [vertex, level] = queue.shift();
+    result.push({ vertex, level });
 
     // Marcar nó atual como corrente
     const currentVertex = vertex;
+    const currentLevel = level;
     const timeout1 = setTimeout(() => {
       svg
         .selectAll(".node")
         .filter((d) => d.id === currentVertex)
         .attr("class", "node node-current");
+
+      // Adicionar label de nível no nó
+      svg
+        .selectAll(".node")
+        .filter((d) => d.id === currentVertex)
+        .append("text")
+        .attr("class", "level-label")
+        .attr("y", 35)
+        .attr("fill", "#2c3e50")
+        .attr("font-size", "12px")
+        .attr("font-weight", "bold")
+        .text(`Nível ${currentLevel}`);
     }, step * speed);
     animationTimeouts.push(timeout1);
     step++;
@@ -288,7 +305,8 @@ function runBFS() {
     for (let neighbor of graph[vertex]) {
       if (!visited.has(neighbor)) {
         visited.add(neighbor);
-        queue.push(neighbor);
+        levels[neighbor] = level + 1;
+        queue.push([neighbor, level + 1]);
 
         // Marcar vizinho como visitando (na fila)
         const neighborNode = neighbor;
@@ -304,11 +322,29 @@ function runBFS() {
     step++;
   }
 
-  // Mostrar resultado final
+  // Mostrar resultado final com níveis
   const finalTimeout = setTimeout(() => {
-    document.getElementById("resultDisplay").textContent = `BFS: ${result.join(
-      " → "
-    )}`;
+    const path = result.map((item) => item.vertex).join(" → ");
+    const levelInfo = result
+      .map((item) => `${item.vertex}(N${item.level})`)
+      .join(" → ");
+
+    // Agrupar por níveis
+    const levelGroups = {};
+    result.forEach((item) => {
+      if (!levelGroups[item.level]) {
+        levelGroups[item.level] = [];
+      }
+      levelGroups[item.level].push(item.vertex);
+    });
+
+    const levelDisplay = Object.entries(levelGroups)
+      .map(([level, vertices]) => `  Nível ${level}: ${vertices.join(", ")}`)
+      .join("\n");
+
+    document.getElementById(
+      "resultDisplay"
+    ).textContent = `BFS: ${path}\n\nCom níveis: ${levelInfo}\n\n${levelDisplay}`;
   }, (step + 1) * speed);
   animationTimeouts.push(finalTimeout);
 }
