@@ -178,7 +178,7 @@ function stopAnimation() {
   resetNodeColors();
 }
 
-// ====== DFS ======
+// ====== DFS (Iterativo com Pilha - Todas as Componentes) ======
 function runDFS() {
   const start = document.getElementById("startNode").value.trim();
   if (!graph[start]) {
@@ -190,52 +190,78 @@ function runDFS() {
   resetNodeColors();
 
   let visited = new Set();
-  let result = [];
+  let resultComponents = [];
   let step = 0;
   const speed = parseInt(document.getElementById("speedControl").value);
 
-  function dfs(v) {
-    visited.add(v);
-    result.push(v);
+  // Função auxiliar para DFS iterativo em uma componente
+  function dfsIterative(startVertex) {
+    let stack = [startVertex];
+    let component = [];
+    visited.add(startVertex);
 
-    // Animar nó atual
-    const timeout1 = setTimeout(() => {
-      svg
-        .selectAll(".node")
-        .filter((d) => d.id === v)
-        .attr("class", "node node-current");
-    }, step * speed);
-    animationTimeouts.push(timeout1);
-    step++;
+    while (stack.length > 0) {
+      let current = stack.pop();
+      component.push(current);
 
-    // Marcar como visitado após um delay
-    const timeout2 = setTimeout(() => {
-      svg
-        .selectAll(".node")
-        .filter((d) => d.id === v)
-        .attr("class", "node node-visited");
-    }, step * speed);
-    animationTimeouts.push(timeout2);
+      // Animar nó atual (sendo processado)
+      const currentVertex = current;
+      const timeout1 = setTimeout(() => {
+        svg
+          .selectAll(".node")
+          .filter((d) => d.id === currentVertex)
+          .attr("class", "node node-current");
+      }, step * speed);
+      animationTimeouts.push(timeout1);
+      step++;
 
-    for (let neighbor of graph[v]) {
-      if (!visited.has(neighbor)) {
-        dfs(neighbor);
+      // Marcar como visitado após um delay
+      const timeout2 = setTimeout(() => {
+        svg
+          .selectAll(".node")
+          .filter((d) => d.id === currentVertex)
+          .attr("class", "node node-visited");
+      }, step * speed);
+      animationTimeouts.push(timeout2);
+
+      // Adicionar vizinhos não visitados à pilha
+      for (let neighbor of graph[current]) {
+        if (!visited.has(neighbor)) {
+          stack.push(neighbor);
+          visited.add(neighbor);
+        }
       }
+      step++;
+    }
+
+    return component;
+  }
+
+  // Primeira componente a partir do nó inicial
+  let mainComponent = dfsIterative(start);
+  resultComponents.push(mainComponent);
+
+  // DFS em outros componentes desconectados
+  for (let vertex of Object.keys(graph)) {
+    if (!visited.has(vertex)) {
+      let newComponent = dfsIterative(vertex);
+      resultComponents.push(newComponent);
     }
   }
 
-  dfs(start);
-
   // Mostrar resultado final
   const finalTimeout = setTimeout(() => {
-    document.getElementById("resultDisplay").textContent = `DFS: ${result.join(
-      " → "
-    )}`;
+    const formatted = resultComponents
+      .map((comp) => comp.join(" → "))
+      .join("  |  ");
+    document.getElementById(
+      "resultDisplay"
+    ).textContent = `DFS (Iterativo): ${formatted}`;
   }, (step + 1) * speed);
   animationTimeouts.push(finalTimeout);
 }
 
-// ====== BFS ======
+// ====== BFS (Com Detecção de Componentes) ======
 function runBFS() {
   const start = document.getElementById("startNode").value.trim();
   if (!graph[start]) {
@@ -246,105 +272,135 @@ function runBFS() {
   stopAnimation();
   resetNodeColors();
 
-  let visited = new Set([start]);
-  let queue = [[start, 0]]; // [vértice, nível]
-  let result = [];
-  let levels = {}; // Armazena o nível de cada vértice
+  let visited = new Set();
+  let resultComponents = [];
   let step = 0;
   const speed = parseInt(document.getElementById("speedControl").value);
 
-  levels[start] = 0;
+  // Função auxiliar para BFS em uma componente
+  function bfsIterative(startVertex) {
+    let queue = [[startVertex, 0]]; // [vértice, nível]
+    let component = [];
+    let levels = {};
 
-  // Marcar nó inicial como visitando
-  const timeout0 = setTimeout(() => {
-    svg
-      .selectAll(".node")
-      .filter((d) => d.id === start)
-      .attr("class", "node node-visiting");
-  }, step * speed);
-  animationTimeouts.push(timeout0);
-  step++;
+    visited.add(startVertex);
+    levels[startVertex] = 0;
 
-  while (queue.length > 0) {
-    let [vertex, level] = queue.shift();
-    result.push({ vertex, level });
-
-    // Marcar nó atual como corrente
-    const currentVertex = vertex;
-    const currentLevel = level;
-    const timeout1 = setTimeout(() => {
+    // Marcar nó inicial como visitando
+    const timeout0 = setTimeout(() => {
       svg
         .selectAll(".node")
-        .filter((d) => d.id === currentVertex)
-        .attr("class", "node node-current");
-
-      // Adicionar label de nível no nó
-      svg
-        .selectAll(".node")
-        .filter((d) => d.id === currentVertex)
-        .append("text")
-        .attr("class", "level-label")
-        .attr("y", 35)
-        .attr("fill", "#2c3e50")
-        .attr("font-size", "12px")
-        .attr("font-weight", "bold")
-        .text(`Nível ${currentLevel}`);
+        .filter((d) => d.id === startVertex)
+        .attr("class", "node node-visiting");
     }, step * speed);
-    animationTimeouts.push(timeout1);
+    animationTimeouts.push(timeout0);
     step++;
 
-    // Marcar como visitado
-    const timeout2 = setTimeout(() => {
-      svg
-        .selectAll(".node")
-        .filter((d) => d.id === currentVertex)
-        .attr("class", "node node-visited");
-    }, step * speed);
-    animationTimeouts.push(timeout2);
+    while (queue.length > 0) {
+      let [vertex, level] = queue.shift();
+      component.push({ vertex, level });
 
-    for (let neighbor of graph[vertex]) {
-      if (!visited.has(neighbor)) {
-        visited.add(neighbor);
-        levels[neighbor] = level + 1;
-        queue.push([neighbor, level + 1]);
+      // Marcar nó atual como corrente
+      const currentVertex = vertex;
+      const currentLevel = level;
+      const timeout1 = setTimeout(() => {
+        svg
+          .selectAll(".node")
+          .filter((d) => d.id === currentVertex)
+          .attr("class", "node node-current");
 
-        // Marcar vizinho como visitando (na fila)
-        const neighborNode = neighbor;
-        const timeout3 = setTimeout(() => {
-          svg
-            .selectAll(".node")
-            .filter((d) => d.id === neighborNode)
-            .attr("class", "node node-visiting");
-        }, step * speed);
-        animationTimeouts.push(timeout3);
+        // Adicionar label de nível no nó
+        svg
+          .selectAll(".node")
+          .filter((d) => d.id === currentVertex)
+          .append("text")
+          .attr("class", "level-label")
+          .attr("y", 35)
+          .attr("fill", "#2c3e50")
+          .attr("font-size", "12px")
+          .attr("font-weight", "bold")
+          .text(`Nível ${currentLevel}`);
+      }, step * speed);
+      animationTimeouts.push(timeout1);
+      step++;
+
+      // Marcar como visitado
+      const timeout2 = setTimeout(() => {
+        svg
+          .selectAll(".node")
+          .filter((d) => d.id === currentVertex)
+          .attr("class", "node node-visited");
+      }, step * speed);
+      animationTimeouts.push(timeout2);
+
+      for (let neighbor of graph[vertex]) {
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          levels[neighbor] = level + 1;
+          queue.push([neighbor, level + 1]);
+
+          // Marcar vizinho como visitando (na fila)
+          const neighborNode = neighbor;
+          const timeout3 = setTimeout(() => {
+            svg
+              .selectAll(".node")
+              .filter((d) => d.id === neighborNode)
+              .attr("class", "node node-visiting");
+          }, step * speed);
+          animationTimeouts.push(timeout3);
+        }
       }
+      step++;
     }
-    step++;
+
+    return component;
+  }
+
+  // Primeira componente a partir do nó inicial
+  let mainComponent = bfsIterative(start);
+  resultComponents.push(mainComponent);
+
+  // BFS em outros componentes desconectados
+  for (let vertex of Object.keys(graph)) {
+    if (!visited.has(vertex)) {
+      let newComponent = bfsIterative(vertex);
+      resultComponents.push(newComponent);
+    }
   }
 
   // Mostrar resultado final com níveis
   const finalTimeout = setTimeout(() => {
-    const path = result.map((item) => item.vertex).join(" → ");
-    const levelInfo = result
-      .map((item) => `${item.vertex}(N${item.level})`)
-      .join(" → ");
+    const componentsFormatted = resultComponents.map((component) => {
+      const path = component.map((item) => item.vertex).join(" → ");
+      const levelInfo = component
+        .map((item) => `${item.vertex}(N${item.level})`)
+        .join(" → ");
 
-    // Agrupar por níveis
-    const levelGroups = {};
-    result.forEach((item) => {
-      if (!levelGroups[item.level]) {
-        levelGroups[item.level] = [];
-      }
-      levelGroups[item.level].push(item.vertex);
+      // Agrupar por níveis
+      const levelGroups = {};
+      component.forEach((item) => {
+        if (!levelGroups[item.level]) {
+          levelGroups[item.level] = [];
+        }
+        levelGroups[item.level].push(item.vertex);
+      });
+
+      const levelDisplay = Object.entries(levelGroups)
+        .map(
+          ([level, vertices]) => `    Nível ${level}: ${vertices.join(", ")}`
+        )
+        .join("\n");
+
+      return `${path}\n  Com níveis: ${levelInfo}\n${levelDisplay}`;
     });
 
-    const levelDisplay = Object.entries(levelGroups)
-      .map(([level, vertices]) => `  Nível ${level}: ${vertices.join(", ")}`)
-      .join("\n");
+    const finalResult = componentsFormatted.join(
+      "\n\n  ---Componente Separada---\n\n"
+    );
 
     document.getElementById(
       "resultDisplay"
-    ).textContent = `BFS: ${path}\n\nCom níveis: ${levelInfo}\n\n${levelDisplay}`;
+    ).textContent = `BFS:\n\n${finalResult}`;
   }, (step + 1) * speed);
   animationTimeouts.push(finalTimeout);
 }
