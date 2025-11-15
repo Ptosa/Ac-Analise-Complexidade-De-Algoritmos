@@ -178,6 +178,26 @@ function stopAnimation() {
   resetNodeColors();
 }
 
+// Função de ordenação alfanumérica
+function sortNeighbors(neighbors) {
+  return neighbors.slice().sort((a, b) => {
+    // Verifica se são números
+    const aIsNum = !isNaN(a);
+    const bIsNum = !isNaN(b);
+    
+    if (aIsNum && bIsNum) {
+      // Ambos são números - ordenação numérica
+      return Number(a) - Number(b);
+    } else if (!aIsNum && !bIsNum) {
+      // Ambos são strings - ordenação alfabética
+      return a.localeCompare(b);
+    } else {
+      // Misturado - números primeiro
+      return aIsNum ? -1 : 1;
+    }
+  });
+}
+
 // ====== DFS (Iterativo com Pilha - Todas as Componentes) ======
 function runDFS() {
   const start = document.getElementById("startNode").value.trim();
@@ -224,8 +244,9 @@ function runDFS() {
       }, step * speed);
       animationTimeouts.push(timeout2);
 
-      // Adicionar vizinhos não visitados à pilha
-      for (let neighbor of graph[current]) {
+      // Adicionar vizinhos não visitados à pilha (ordenados)
+      const sortedNeighbors = sortNeighbors(graph[current]);
+      for (let neighbor of sortedNeighbors.reverse()) {
         if (!visited.has(neighbor)) {
           stack.push(neighbor);
           visited.add(neighbor);
@@ -241,8 +262,9 @@ function runDFS() {
   let mainComponent = dfsIterative(start);
   resultComponents.push(mainComponent);
 
-  // DFS em outros componentes desconectados
-  for (let vertex of Object.keys(graph)) {
+  // DFS em outros componentes desconectados (ordenados)
+  const sortedVertices = sortNeighbors(Object.keys(graph));
+  for (let vertex of sortedVertices) {
     if (!visited.has(vertex)) {
       let newComponent = dfsIterative(vertex);
       resultComponents.push(newComponent);
@@ -333,7 +355,9 @@ function runBFS() {
       }, step * speed);
       animationTimeouts.push(timeout2);
 
-      for (let neighbor of graph[vertex]) {
+      // Processar vizinhos ordenados
+      const sortedNeighbors = sortNeighbors(graph[vertex]);
+      for (let neighbor of sortedNeighbors) {
         if (!visited.has(neighbor)) {
           visited.add(neighbor);
           levels[neighbor] = level + 1;
@@ -360,8 +384,9 @@ function runBFS() {
   let mainComponent = bfsIterative(start);
   resultComponents.push(mainComponent);
 
-  // BFS em outros componentes desconectados
-  for (let vertex of Object.keys(graph)) {
+  // BFS em outros componentes desconectados (ordenados)
+  const sortedVertices = sortNeighbors(Object.keys(graph));
+  for (let vertex of sortedVertices) {
     if (!visited.has(vertex)) {
       let newComponent = bfsIterative(vertex);
       resultComponents.push(newComponent);
