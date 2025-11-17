@@ -4,6 +4,19 @@ O modelo geralmente usa 0.5 como limite para decidir entre classes. Se você que
 Isso aumenta a sensibilidade para detectar discurso de ódio, mas pode reduzir a precisão. Vale a pena avaliar a curva Precision-Recall.
 
 
+import numpy as np
+from sklearn.metrics import precision_recall_curve
+
+def find_best_threshold(pred_probs, true_labels):
+    precision, recall, thresholds = precision_recall_curve(true_labels, pred_probs)
+    best_idx = np.argmax(recall - (1 - precision))  # Ou outra métrica customizada
+    return thresholds[best_idx]
+
+# Exemplo de uso:
+best_threshold = find_best_threshold(pred_probs, true_labels)
+print("Melhor threshold:", best_threshold)
+
+
 ✅ 2. Rebalanceamento de classes
 
 Se sua base é desbalanceada, use:
@@ -32,12 +45,54 @@ Isso ajuda a aumentar a diversidade da classe de ódio.
 Focal Loss dá mais peso para exemplos difíceis.
 Weighted Cross-Entropy aumenta penalização para erros na classe minoritária.
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=None, gamma=2, reduction='mean'):
+        super(FocalLoss, self).__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduction = reduction
+
+    def forward(self, inputs, targets):
+        ce_loss = F.cross_entropy(inputs, targets, weight=self.alpha, reduction='none')
+        pt = torch.exp(-ce_loss)
+        focal_loss = ((1 - pt) ** self.gamma) * ce_loss
+        if self.reduction == 'mean':
+            return focal_loss.mean()
+        else:
+            return focal_loss.sum()
+
+# Exemplo: classe 0 = não ódio, classe 1 = ódio
+alpha = torch.tensor([0.3, 0.7]).to(device)  # Ajuste conforme o desbalanceamento
+loss_fn = FocalLoss(alpha=alpha, gamma=2)
+
+
 
 ✅ 5. Ajuste do tamanho do batch e learning rate
 
 Às vezes, batch menor ajuda a capturar nuances.
 Teste learning rate scheduler (ex.: ReduceLROnPlateau).
 
+from transformers import TrainingArguments
+
+training_args = TrainingArguments(
+    output_dir="./results",
+    evaluation_strategy="epoch",
+    save_strategy="epoch",
+    learning_rate=2e-5,
+    per_device_train_batch_size=8,   # Batch pequeno
+    per_device_eval_batch_size=8,
+    num_train_epochs=3,
+    weight_decay=0.01,
+    logging_dir="./logs",
+    logging_steps=100,
+    load_best_model_at_end=True,
+    metric_for_best_model="recall",  # Foco em Recall
+    greater_is_better=True
+)
 
 ✅ 6. Uso de métricas no treinamento
 
