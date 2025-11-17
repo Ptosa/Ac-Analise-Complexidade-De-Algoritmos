@@ -184,7 +184,7 @@ function sortNeighbors(neighbors) {
     // Verifica se são números
     const aIsNum = !isNaN(a);
     const bIsNum = !isNaN(b);
-    
+
     if (aIsNum && bIsNum) {
       // Ambos são números - ordenação numérica
       return Number(a) - Number(b);
