@@ -1,0 +1,51 @@
+✅ 1. Ajuste de limiar (Threshold Tuning)
+
+O modelo geralmente usa 0.5 como limite para decidir entre classes. Se você quer aumentar o Recall, pode reduzir esse limiar (por exemplo, para 0.4 ou 0.3).
+Isso aumenta a sensibilidade para detectar discurso de ódio, mas pode reduzir a precisão. Vale a pena avaliar a curva Precision-Recall.
+
+
+✅ 2. Rebalanceamento de classes
+
+Se sua base é desbalanceada, use:
+
+Oversampling da classe minoritária (SMOTE, Random Oversampling).
+Undersampling da classe majoritária.
+Ou class weights no treinamento (class_weight='balanced' ou manualmente ajustado).
+
+
+
+
+✅ 3. Data Augmentation para texto
+
+Técnicas como:
+
+Back-translation (traduzir para outro idioma e voltar).
+Sinônimos (WordNet ou embeddings).
+EDA (Easy Data Augmentation): troca de palavras, inserção, remoção.
+
+
+Isso ajuda a aumentar a diversidade da classe de ódio.
+
+
+✅ 4. Fine-tuning com Focal Loss ou Weighted Cross-Entropy
+
+Focal Loss dá mais peso para exemplos difíceis.
+Weighted Cross-Entropy aumenta penalização para erros na classe minoritária.
+
+
+✅ 5. Ajuste do tamanho do batch e learning rate
+
+Às vezes, batch menor ajuda a capturar nuances.
+Teste learning rate scheduler (ex.: ReduceLROnPlateau).
+
+
+✅ 6. Uso de métricas no treinamento
+
+Em vez de otimizar só para accuracy, monitore Recall ou F1-score da classe positiva.
+Pode usar Early Stopping baseado em Recall.
+
+
+✅ 7. Pós-processamento com calibragem
+
+Use Platt Scaling ou Isotonic Regression para calibrar probabilidades.
+Isso ajuda a ajustar o trade-off entre Recall e Precision.
